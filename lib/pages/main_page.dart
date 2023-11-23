@@ -30,16 +30,28 @@ class _MainPageState extends State<MainPage> {
   }
 
   removeExpense(Expense expense) {
+    final deletingIndex = expenses.indexOf(expense);
     setState(() {
       expenses.remove(expense);
     });
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      duration: const Duration(seconds: 3),
+      content: const Text("Harcama başarıyla silindi"),
+      action: SnackBarAction(
+          label: 'Geri Al',
+          onPressed: () {
+            setState(() {
+              expenses.insert(deletingIndex, expense);
+            });
+          }),
+    ));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 252, 161, 24),
         centerTitle: true,
         title: const Text(
           "Expense App",

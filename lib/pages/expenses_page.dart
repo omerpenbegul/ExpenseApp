@@ -31,21 +31,6 @@ class _ExpensesPageState extends State<ExpensesPage> {
                   child: ExpenseItem(widget.expenses[index]),
                   onDismissed: (direction) {
                     widget.onRemove(widget.expenses[index]);
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text(
-                          "Harcama Basariyla silindi!",
-                          style: TextStyle(color: Colors.white, fontSize: 12),
-                        ),
-                        action: SnackBarAction(
-                            label: "Geri Al",
-                            textColor: Colors.red,
-                            onPressed: () {
-                              setState(() {});
-                            }),
-                      ),
-                    );
                   },
                 );
               }),
