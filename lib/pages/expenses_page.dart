@@ -5,18 +5,15 @@ import 'package:expenceapp/widgets/expense_item.dart';
 import 'package:flutter/material.dart';
 
 class ExpensesPage extends StatefulWidget {
-  const ExpensesPage({Key? key}) : super(key: key);
-
+  const ExpensesPage(this.expenses, this.onRemove, {Key? key})
+      : super(key: key);
+  final List<Expense> expenses;
+  final void Function(Expense expense) onRemove;
   @override
   _ExpensesPageState createState() => _ExpensesPageState();
 }
 
 class _ExpensesPageState extends State<ExpensesPage> {
-  List<Expense> expenses = [
-    Expense(name: "Yemek", price: 500.529, date: DateTime.now()),
-    Expense(name: "Udemy Kursu", price: 200, date: DateTime.now()),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -27,9 +24,30 @@ class _ExpensesPageState extends State<ExpensesPage> {
         ),
         Expanded(
           child: ListView.builder(
-              itemCount: expenses.length,
+              itemCount: widget.expenses.length,
               itemBuilder: (context, index) {
-                return ExpenseItem(expenses[index]);
+                return Dismissible(
+                  key: ValueKey(widget.expenses[index]),
+                  child: ExpenseItem(widget.expenses[index]),
+                  onDismissed: (direction) {
+                    widget.onRemove(widget.expenses[index]);
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text(
+                          "Harcama Basariyla silindi!",
+                          style: TextStyle(color: Colors.white, fontSize: 12),
+                        ),
+                        action: SnackBarAction(
+                            label: "Geri Al",
+                            textColor: Colors.red,
+                            onPressed: () {
+                              setState(() {});
+                            }),
+                      ),
+                    );
+                  },
+                );
               }),
         ),
         const SizedBox(

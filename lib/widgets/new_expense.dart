@@ -1,8 +1,11 @@
+import 'package:expenceapp/models/expense.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class NewExpense extends StatefulWidget {
-  const NewExpense({Key? key}) : super(key: key);
+  const NewExpense(this.onnAdd, {Key? key}) : super(key: key);
+  final void Function(Expense expense) onnAdd;
 
   @override
   _NewExpenseState createState() => _NewExpenseState();
@@ -11,19 +14,21 @@ class NewExpense extends StatefulWidget {
 class _NewExpenseState extends State<NewExpense> {
   var _expenseNameController = TextEditingController();
   var _expensePriceController = TextEditingController();
-  var _selectedDate = DateTime.now();
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
+  DateTime? _selectedDate;
+  Category _selectedCategory = Category.Food;
+
+  void _openDate() async {
+    DateTime today = DateTime.now();
+    DateTime oneYearAgo = DateTime(today.year - 1, today.month, today.day);
+    DateTime? selectedDate = await showDatePicker(
         context: context,
-        initialDate: _selectedDate,
-        firstDate: DateTime.now().subtract(const Duration(days: 365)),
-        lastDate: DateTime.now());
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked; //
-      });
-    }
+        initialDate: today,
+        firstDate: oneYearAgo,
+        lastDate: today);
+    setState(() {
+      _selectedDate = selectedDate;
+    });
   }
 
   @override
@@ -36,31 +41,76 @@ class _NewExpenseState extends State<NewExpense> {
           TextField(
             controller: _expenseNameController,
             maxLength: 50,
-            decoration: InputDecoration(labelText: "Harcama Adı"),
+            decoration: const InputDecoration(labelText: "Harcama Adı"),
           ),
-          TextField(
-            controller: _expensePriceController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: "Harcama Miktarı"),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _expensePriceController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                      labelText: "Harcama Miktarı", prefixText: "₺"),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.calendar_month),
+                onPressed: () => _openDate(),
+              ),
+              Text(_selectedDate == null
+                  ? "Tarih Seciniz"
+                  : DateFormat.yMd().format(_selectedDate!)),
+            ],
           ),
+          const SizedBox(
+            height: 15,
+          ),
+          Row(
+            children: [
+              DropdownButton(
+                  value: _selectedCategory,
+                  items: Category.values.map((category) {
+                    return DropdownMenuItem(
+                        value: category, child: Text(category.name));
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      if (value != null) _selectedCategory = value;
+                    });
+                  })
+            ],
+          ),
+          const Spacer(),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              IconButton(
-                icon: const Icon(Icons.calendar_month),
-                onPressed: () => _selectDate(context),
+              ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Vazgec")),
+              const SizedBox(
+                width: 10,
               ),
+              ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.amber,
+                      foregroundColor: Colors.white),
+                  onPressed: () {
+                    double? price =
+                        double.tryParse(_expensePriceController.text);
+
+                    Expense expense = Expense(
+                        name: _expenseNameController.text,
+                        price: price!,
+                        date: _selectedDate!,
+                        category: _selectedCategory);
+                    widget.onnAdd(expense);
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Ekle")),
             ],
           ),
-          Text(DateFormat.yMd().format(_selectedDate)),
-          ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.amber, foregroundColor: Colors.white),
-              onPressed: () {
-                print(
-                    "Kaydedilen değer: ${_expenseNameController.text} ${_expensePriceController.text}");
-              },
-              child: Text("Ekle"))
         ]),
       ),
     );

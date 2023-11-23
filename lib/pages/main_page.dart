@@ -1,3 +1,4 @@
+import 'package:expenceapp/models/expense.dart';
 import 'package:expenceapp/pages/expenses_page.dart';
 import 'package:expenceapp/widgets/new_expense.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,30 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  List<Expense> expenses = [
+    Expense(
+        name: "Yemek",
+        price: 500.529,
+        date: DateTime.now(),
+        category: Category.Food),
+    Expense(
+        name: "Udemy Kursu",
+        price: 200,
+        date: DateTime.now(),
+        category: Category.Work),
+  ];
+  addExpense(Expense expense) {
+    setState(() {
+      expenses.add(expense);
+    });
+  }
+
+  removeExpense(Expense expense) {
+    setState(() {
+      expenses.remove(expense);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,7 +52,7 @@ class _MainPageState extends State<MainPage> {
               showModalBottomSheet(
                   context: context,
                   builder: (ctx) {
-                    return NewExpense();
+                    return NewExpense(addExpense);
                   });
             },
             icon: const Icon(Icons.add_circle_sharp),
@@ -40,7 +65,7 @@ class _MainPageState extends State<MainPage> {
                 bottomRight: Radius.circular(30))),
         elevation: 8,
       ),
-      body: const ExpensesPage(),
+      body: ExpensesPage(expenses, removeExpense),
     );
   }
 }
